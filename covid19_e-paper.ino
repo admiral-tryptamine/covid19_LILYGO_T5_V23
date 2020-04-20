@@ -101,7 +101,7 @@ void setup() {
 
 void DrawIcon(int region_code, long confirmed,long deaths, long recovered )
 {
-  
+  display.writeScreenBuffer();
   display.setRotation(3);
   display.setFullWindow();
   display.clearScreen();
