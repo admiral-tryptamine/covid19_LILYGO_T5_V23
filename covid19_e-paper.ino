@@ -1,15 +1,30 @@
+
+
 #define ENABLE_GxEPD2_GFX 0
 #include <GxEPD2_BW.h>
-#include <GxEPD2_3C.h>
+#include "SPI.h"
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeSansBold18pt7b.h>
-
-GxEPD2_3C<GxEPD2_290c, GxEPD2_290c::HEIGHT> display(GxEPD2_290c(/*CS=*/ 15, /*DC=*/ 27, /*RST=*/ 26, /*BUSY=*/ 25));
-#include "bitmaps/Bitmaps3c128x296.h" // 2.9"  b/w/r
 #include "Icons.h"
-
 #include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
+
+GxEPD2_BW<GxEPD2_213_B73, GxEPD2_213_B73::HEIGHT> display(GxEPD2_213_B73(/*CS=5*/ SS, /*DC=*/ 17, /*RST=*/ 16, /*BUSY=*/ 4)); // GDEH0213B73
+#include "bitmaps/Bitmaps128x250.h" // 2.13" b/w
+
+
+#define SPI_MOSI 23
+#define SPI_MISO -1
+#define SPI_CLK 18
+#define ELINK_SS 5
+#define ELINK_BUSY 4
+#define ELINK_RESET 16
+#define ELINK_DC 17
+
+#define BUTTON_PIN 39
+
+
+SPIClass sdSPI(VSPI);
 
 
 const char* ssid     = "********";     // your network SSID (name of wifi network)
@@ -56,6 +71,8 @@ const String regionName[] = {
 };
 
 void setup() {
+
+
   //Initialize serial and wait for port to open:
   Serial.begin(115200);
   delay(100);
@@ -74,36 +91,37 @@ void setup() {
   Serial.print("Connected to ");
   Serial.println(ssid);
 
-  display.init(115200); // uses standard SPI pins, e.g. SCK(18), MISO(19), MOSI(23), SS(5)
-  SPI.end(); // release standard SPI pins, e.g. SCK(18), MISO(19), MOSI(23), SS(5)
-  SPI.begin(13, 12, 14, 15); // map and init SPI pins SCK(13), MISO(12), MOSI(14), SS(15)
+
+    SPI.begin(SPI_CLK, SPI_MISO, SPI_MOSI, ELINK_SS);
+    display.init(); // enable diagnostic output on Serial//  SPI.end(); // release standard SPI pins, e.g. SCK(18), MISO(19), MOSI(23), SS(5)
+ //   SPI: void begin(int8_t sck=-1, int8_t miso=-1, int8_t mosi=-1, int8_t ss=-1);
+//  SPI.begin(18, -1, 23, 5); // map and init SPI pins SCK(13), MISO(12), MOSI(14), SS(15)
 
 }
 
 void DrawIcon(int region_code, long confirmed,long deaths, long recovered )
 {
-  display.writeScreenBuffer();
+  
   display.setRotation(3);
   display.setFullWindow();
   display.clearScreen();
-  
-  display.firstPage();
+
   do
   {
     display.fillScreen(GxEPD_WHITE);
     
     display.setFont(&FreeMono9pt7b);
     display.setTextColor(GxEPD_BLACK); 
-    display.setCursor(130, 13);
+    display.setCursor(110, 13);
     display.print(CONFIRMED); 
-    display.setCursor(130, 53);
+    display.setCursor(110, 53);
     display.print(DEATHS); 
-    display.setCursor(130, 93);
+    display.setCursor(110, 93);
     display.print(RECOVERED); 
 
     display.setFont(&FreeSansBold18pt7b);
-    display.setTextColor(GxEPD_RED);
-    display.setCursor(160, 40);
+    display.setTextColor(GxEPD_BLACK);
+    display.setCursor(110, 40);
     char ConfirmedNumber[6];
     dtostrf(confirmed,1,0,ConfirmedNumber);
     int16_t tbx_c, tby_c; uint16_t tbw_c, tbh_c;
@@ -111,12 +129,12 @@ void DrawIcon(int region_code, long confirmed,long deaths, long recovered )
     display.print(ConfirmedNumber); 
     
     display.setFont(&FreeSansBold18pt7b);
-    display.setTextColor(GxEPD_RED);
+    display.setTextColor(GxEPD_BLACK);
     char DeathsNumber[5];
     dtostrf(deaths,1,0,DeathsNumber);
     int16_t tbx_d, tby_d; uint16_t tbw_d, tbh_d;
     display.getTextBounds(DeathsNumber, 0, 0, &tbx_d, &tby_d, &tbw_d, &tbh_d);
-    display.setCursor(160 + tbw_c - tbw_d, 80);
+    display.setCursor(110 + tbw_c - tbw_d, 80);
     display.print(String(deaths)); 
 
     display.setFont(&FreeSansBold18pt7b);
@@ -125,7 +143,7 @@ void DrawIcon(int region_code, long confirmed,long deaths, long recovered )
     dtostrf(recovered,1,0,RecoveredNumber);
     int16_t tbx_r, tby_r; uint16_t tbw_r, tbh_r;
     display.getTextBounds(RecoveredNumber, 0, 0, &tbx_r, &tby_r, &tbw_r, &tbh_r);
-    display.setCursor(160 + tbw_c - tbw_r, 120);
+    display.setCursor(110 + tbw_c - tbw_r, 120);
     display.print(RecoveredNumber); 
 
   }
