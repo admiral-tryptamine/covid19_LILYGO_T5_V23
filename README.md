@@ -15,13 +15,3 @@ A wearable e-paper device to track the covid19 status coded by breakstring. Adap
 
 # Connect
 If you have all the libraries above installed (most can be found through the built-in Library manager) then compiling and installing should be a breeze. Message me if you run into any problems and I'll try to help you out :)  Do not forgot to change the WiFi SSID and password at the beginning of the sketch to match your own settings. It will pull the confirmed/recovered/deaths data of global, China, Italy, Spain, USA and Germany, from the mathdroid COVID-19 API (which pulls data from John Hopkins University) and cycle through the data country by country in a loop. If you want more, just add logo data of the country and also the related API endpoints. 
-
-# Sample pictures
-![All](/images/ALL.jpg "Global")
-![China](/images/CN.jpg "China")
-![Italy](/images/IT.jpg "Italy")
-![Spain](/images/ES.jpg "Spain")
-![USA](/images/USA.jpg "USA")
-![Germany](/images/DE.jpg "Germany")
-
-
